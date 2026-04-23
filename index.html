@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pixel Sandbox</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app">
+      <section class="panel">
+        <h1>Pixel Sandbox</h1>
+        <div class="controls">
+          <button id="clear-button" type="button">Clear</button>
+          <button id="fill-button" type="button">Fill Background</button>
+          <button id="block-button" type="button">Draw Test Block</button>
+          <button id="border-button" type="button">Draw Border</button>
+        </div>
+      </section>
+
+      <section class="viewer">
+        <canvas
+          id="pixel-canvas"
+          width="64"
+          height="64"
+          aria-label="Pixel canvas"
+        ></canvas>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
