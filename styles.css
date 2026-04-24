@@ -80,9 +80,41 @@ button:hover {
   padding: 16px;
 }
 
+.inspection-panel {
+  margin-top: 16px;
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 12px;
+  padding: 16px;
+}
+
 .log-panel h2 {
   margin: 0 0 12px;
   font-size: 16px;
+}
+
+.inspection-panel h2,
+.color-counts h3 {
+  margin: 0 0 12px;
+  font-size: 16px;
+}
+
+.inspection-panel p {
+  margin: 0 0 8px;
+  font-size: 14px;
+}
+
+#color-counts {
+  display: grid;
+  gap: 8px;
+}
+
+.color-count-row {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 8px 10px;
+  background: #f9fafb;
+  font-size: 14px;
 }
 
 #log-list {

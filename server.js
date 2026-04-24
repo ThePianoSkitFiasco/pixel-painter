@@ -4,6 +4,7 @@ const path = require("path");
 
 const { createCanvas } = require("./canvas-state");
 const { applyTool } = require("./tools");
+const { inspectCanvas } = require("./inspectors");
 
 const PORT = process.env.PORT || 3000;
 const canvas = createCanvas(64, 64);
@@ -116,6 +117,11 @@ const server = http.createServer(async (request, response) => {
 
   if (request.method === "GET" && url === "/canvas") {
     sendJson(response, 200, getCanvasData());
+    return;
+  }
+
+  if (request.method === "GET" && url === "/inspect") {
+    sendJson(response, 200, inspectCanvas(getCanvasData()));
     return;
   }
 

@@ -2,6 +2,9 @@ const canvasElement = document.getElementById("pixel-canvas");
 const context = canvasElement.getContext("2d");
 const promptInput = document.getElementById("prompt-input");
 const logList = document.getElementById("log-list");
+const filledPixelsElement = document.getElementById("filled-pixels");
+const boundsElement = document.getElementById("bounds");
+const colorCountsElement = document.getElementById("color-counts");
 let canvasState = null;
 
 function setCanvasState(nextCanvasState) {
@@ -30,11 +33,42 @@ function renderCanvas() {
   }
 }
 
+function renderInspection(inspection) {
+  filledPixelsElement.textContent = String(inspection.filledPixels);
+
+  if (!inspection.bounds) {
+    boundsElement.textContent = "None";
+  } else {
+    boundsElement.textContent =
+      `x:${inspection.bounds.x}, y:${inspection.bounds.y}, ` +
+      `w:${inspection.bounds.w}, h:${inspection.bounds.h}`;
+  }
+
+  colorCountsElement.innerHTML = "";
+
+  const entries = Object.entries(inspection.colorCounts);
+
+  for (let i = 0; i < entries.length; i += 1) {
+    const [colorIndex, count] = entries[i];
+    const row = document.createElement("div");
+    row.className = "color-count-row";
+    row.textContent = `Color ${colorIndex}: ${count}`;
+    colorCountsElement.appendChild(row);
+  }
+}
+
+async function loadInspection() {
+  const response = await fetch("/inspect");
+  const data = await response.json();
+  renderInspection(data);
+}
+
 async function loadCanvas() {
   const response = await fetch("/canvas");
   const data = await response.json();
   setCanvasState(data);
   renderCanvas();
+  await loadInspection();
 }
 
 async function clearCanvas() {
@@ -45,6 +79,7 @@ async function clearCanvas() {
   const data = await response.json();
   setCanvasState(data);
   renderCanvas();
+  await loadInspection();
 }
 
 async function applyTool(action) {
@@ -64,6 +99,7 @@ async function applyTool(action) {
 
   setCanvasState(data.canvas);
   renderCanvas();
+  await loadInspection();
 }
 
 function addLogEntry(prompt, action, result) {
@@ -99,6 +135,7 @@ async function runPromptStep() {
   const data = await response.json();
   setCanvasState(data.canvas);
   renderCanvas();
+  await loadInspection();
   addLogEntry(data.prompt, data.action, data.result);
 }
 
