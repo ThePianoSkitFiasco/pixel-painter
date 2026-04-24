@@ -65,6 +65,52 @@ function readJsonBody(request) {
   });
 }
 
+function chooseAgentAction(prompt) {
+  const text = String(prompt || "").toLowerCase();
+
+  if (text.includes("clear")) {
+    return { type: "clear", action: null };
+  }
+
+  if (text.includes("border")) {
+    return {
+      type: "tool",
+      action: {
+        tool: "draw_rect",
+        args: { x: 0, y: 0, w: 64, h: 64, color: 1 },
+      },
+    };
+  }
+
+  if (text.includes("brick")) {
+    return {
+      type: "tool",
+      action: {
+        tool: "fill_rect",
+        args: { x: 10, y: 20, w: 18, h: 8, color: 4 },
+      },
+    };
+  }
+
+  if (text.includes("stone") || text.includes("cobble")) {
+    return {
+      type: "tool",
+      action: {
+        tool: "fill_rect",
+        args: { x: 12, y: 18, w: 16, h: 10, color: 1 },
+      },
+    };
+  }
+
+  return {
+    type: "tool",
+    action: {
+      tool: "fill_rect",
+      args: { x: 18, y: 18, w: 12, h: 12, color: 2 },
+    },
+  };
+}
+
 const server = http.createServer(async (request, response) => {
   const url = request.url || "/";
 
@@ -95,6 +141,38 @@ const server = http.createServer(async (request, response) => {
   if (request.method === "POST" && url === "/clear") {
     canvas.clearCanvas();
     sendJson(response, 200, getCanvasData());
+    return;
+  }
+
+  if (request.method === "POST" && url === "/agent-step") {
+    try {
+      const body = await readJsonBody(request);
+      const prompt = String(body.prompt || "");
+      const step = chooseAgentAction(prompt);
+      let result;
+
+      if (step.type === "clear") {
+        canvas.clearCanvas();
+        result = { ok: true };
+      } else {
+        result = applyTool(canvas, step.action);
+      }
+
+      sendJson(response, 200, {
+        prompt,
+        action: step.action || { type: "clear" },
+        result,
+        canvas: getCanvasData(),
+      });
+    } catch (error) {
+      sendJson(response, 400, {
+        prompt: "",
+        action: null,
+        result: { ok: false, error: "Invalid JSON" },
+        canvas: getCanvasData(),
+      });
+    }
+
     return;
   }
 

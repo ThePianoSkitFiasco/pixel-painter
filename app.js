@@ -1,5 +1,7 @@
 const canvasElement = document.getElementById("pixel-canvas");
 const context = canvasElement.getContext("2d");
+const promptInput = document.getElementById("prompt-input");
+const logList = document.getElementById("log-list");
 let canvasState = null;
 
 function setCanvasState(nextCanvasState) {
@@ -64,6 +66,42 @@ async function applyTool(action) {
   renderCanvas();
 }
 
+function addLogEntry(prompt, action, result) {
+  const entry = document.createElement("div");
+  entry.className = "log-entry";
+
+  const promptLine = document.createElement("p");
+  promptLine.textContent = `Prompt: ${prompt}`;
+
+  const actionLine = document.createElement("p");
+  actionLine.textContent = `Action: ${JSON.stringify(action)}`;
+
+  const resultLine = document.createElement("p");
+  resultLine.textContent = `Result: ${JSON.stringify(result)}`;
+
+  entry.appendChild(promptLine);
+  entry.appendChild(actionLine);
+  entry.appendChild(resultLine);
+
+  logList.prepend(entry);
+}
+
+async function runPromptStep() {
+  const prompt = promptInput.value.trim();
+  const response = await fetch("/agent-step", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ prompt }),
+  });
+
+  const data = await response.json();
+  setCanvasState(data.canvas);
+  renderCanvas();
+  addLogEntry(data.prompt, data.action, data.result);
+}
+
 document.getElementById("clear-button").addEventListener("click", () => {
   clearCanvas();
 });
@@ -92,6 +130,10 @@ document.getElementById("border-button").addEventListener("click", () => {
     tool: "draw_rect",
     args: { x: 2, y: 2, w: 60, h: 60, color: 1 },
   });
+});
+
+document.getElementById("prompt-button").addEventListener("click", () => {
+  runPromptStep();
 });
 
 loadCanvas();
